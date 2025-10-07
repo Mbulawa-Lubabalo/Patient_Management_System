@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oncology Patient Management System</title>
+
+    <!-- Removed Tailwind CSS dependencies -->
+
+    <!-- Load Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* Define color variables for easy maintenance */
+        :root {
+            --color-primary: #007bff; /* Blue */
+            --color-secondary: #28a745; /* Green */
+            --color-danger: #dc3545; /* Red */
+            --color-bg-light: #f8f9fa;
+            --color-text-dark: #343a40;
+            --color-gray-light: #dee2e6;
+            --color-gray-medium: #ced4da;
+            --color-gray-dark: #495057;
+            --color-yellow: #ffc107;
+            --color-indigo: #6610f2;
+        }
+
+        /* 1. Global and Typography */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg-light);
+            color: var(--color-text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            padding: 24px 0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header-title {
+            font-size: 2.25rem; /* text-4xl equivalent */
+            font-weight: 800; /* font-extrabold equivalent */
+            color: var(--color-primary);
+        }
+
+        .header-subtitle {
+            font-size: 1.125rem; /* text-lg equivalent */
+            color: var(--color-gray-dark);
+            margin-top: 8px; /* mt-2 equivalent */
+        }
+
+        /* 2. Card Styling */
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 24px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            font-size: 1.5rem; /* text-2xl equivalent */
+            font-weight: 600; /* font-semibold equivalent */
+            margin-bottom: 1rem; /* mb-4 equivalent */
+        }
+        .card-title.primary { color: var(--color-primary); }
+        .card-title.secondary { color: var(--color-secondary); }
+
+        /* 3. Form Styling */
+        .form-group-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem; /* space-y-4 equivalent */
+        }
+        .form-group {
+            /* Handled by .form-group-wrapper gap */
+        }
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: block;
+            color: var(--color-gray-dark);
+        }
+        .input-field,
+        .textarea-field {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--color-gray-medium);
+            border-radius: 6px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            box-sizing: border-box; /* Crucial for width: 100% to work with padding */
+        }
+        .input-group-flex {
+            display: flex;
+            gap: 1rem; /* space-x-4 equivalent */
+        }
+        .input-group-flex .form-group {
+            flex: 1; /* flex-1 equivalent */
+            margin-bottom: 0;
+        }
+        .input-field:focus,
+        .textarea-field:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        /* 4. Button Styling */
+        .btn {
+            width: 100%;
+            padding: 10px; /* py-2 equivalent */
+            font-weight: 700; /* font-bold equivalent */
+            border-radius: 8px; /* rounded-lg equivalent */
+            transition: background-color 0.15s ease-in-out;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* shadow-md equivalent */
+        }
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3; /* Darker blue */
+        }
+        .btn-secondary {
+            background-color: var(--color-secondary);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #1e7e34; /* Darker green */
+        }
+
+        .btn-action {
+            width: auto;
+            padding: 4px 12px; /* py-1 px-3 equivalent */
+            font-size: 0.875rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            /* Resetting some .btn styles for action buttons */
+            font-weight: 500;
+            padding: 6px 12px;
+        }
+        .btn-progress {
+            background-color: var(--color-yellow);
+            color: var(--color-text-dark);
+        }
+        .btn-progress:hover {
+            background-color: #e0a800; /* Darker yellow */
+        }
+        .btn-update-id {
+            background-color: var(--color-indigo);
+            color: white;
+            margin-left: 8px; /* ml-2 equivalent */
+        }
+        .btn-update-id:hover {
+            background-color: #520ba6; /* Darker indigo */
+        }
+        .btn-close {
+            background-color: var(--color-danger);
+            color: white;
+        }
+        .btn-close:hover {
+            background-color: #bd2130; /* Darker red */
+        }
+
+        /* 5. Table Styling */
+        .table-container {
+            overflow-x: auto;
+            max-width: 100%;
+        }
+        .patient-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .patient-table th,
+        .patient-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-gray-light);
+        }
+        .patient-table th {
+            background-color: #f1f3f5;
+            font-weight: 700;
+            color: var(--color-gray-dark);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        .patient-table tr:last-child td {
+            border-bottom: none;
+        }
+        .patient-table tbody tr:hover {
+            background-color: #f8f9fa;
+            transition: background-color 0.1s;
+        }
+        .table-placeholder {
+            text-align: center;
+            color: #6c757d;
+            padding: 16px 0;
+        }
+
+
+        /* 6. Layout Grid and Responsiveness */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 24px; /* mb-6 equivalent */
+        }
+        @media (min-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .full-width {
+                grid-column: 1 / -1;
+            }
+        }
+
+        /* 7. Chart/Visualization */
+        #progress-visualization-card {
+            margin-top: 24px; /* mt-6 equivalent */
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem; /* mb-4 equivalent */
+        }
+        .chart-container {
+            height: 400px;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1 class="header-title">Oncology Patient Tracker</h1>
+<!--        <p class="header-subtitle">Managing complex cancer treatment plans and tracking tumor marker progression.</p>-->
+    </header>
+
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+
+        <!-- 1. Patient Registration Form -->
+        <div class="card">
+            <h2 class="card-title primary">Register New Patient</h2>
+            <form id="add-patient-form" class="form-group-wrapper">
+                <div class="form-group">
+                    <label for="name">Patient Name</label>
+                    <input type="text" id="name" name="name" required class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="diagnosis">Diagnosis (e.g., Ovarian Cancer, Stage III)</label>
+                    <input type="text" id="diagnosis" name="diagnosis" required class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="treatmentPlan">Treatment Plan/Protocol</label>
+                    <textarea id="treatmentPlan" name="treatmentPlan" rows="3" required class="textarea-field"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    Register Patient
+                </button>
+            </form>
+        </div>
+
+        <!-- 2. Patient Progress Entry Form -->
+        <div class="card">
+            <h2 class="card-title secondary">Record Patient Progress</h2>
+
+            <form id="add-progress-form" class="form-group-wrapper">
+                <div class="form-group">
+                    <label for="progress_patient_id">Patient ID</label>
+                    <input type="number" id="progress_patient_id" name="patientId" required placeholder="Enter ID or click 'Update Progress'" class="input-field">
+                </div>
+                <div class="input-group-flex">
+                    <div class="form-group">
+                        <label for="cycleNumber">Cycle Number</label>
+                        <input type="number" id="cycleNumber" name="cycleNumber" required class="input-field">
+                    </div>
+                    <div class="form-group">
+                        <label for="measurementDate">Date</label>
+                        <input type="date" id="measurementDate" name="measurementDate" required class="input-field">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tumorMarkerLevel">Tumor Marker Level (U/mL)</label>
+                    <input type="number" id="tumorMarkerLevel" name="tumorMarkerLevel" step="0.1" required class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="status">Status (e.g., Stable Disease, Progression)</label>
+                    <input type="text" id="status" name="status" required class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="treatmentDose">Treatment Dose</label>
+                    <input type="text" id="treatmentDose" name="treatmentDose" placeholder="e.g., Full, Reduced (Toxicity)" required class="input-field">
+                </div>
+                <button type="submit" class="btn btn-secondary">
+                    Record Progress
+                </button>
+            </form>
+        </div>
+
+    </div> <!-- End .content-grid -->
+
+
+    <!-- Patient List (Main Table) - Full Width -->
+    <div class="card full-width">
+        <h2 class="card-title">Active Patient Records</h2>
+
+        <div class="table-container">
+            <table class="patient-table">
+                <thead>
+                <tr>
+                    <th style="width: 5%;">ID</th>
+                    <th style="width: 15%;">Name</th>
+                    <th style="width: 20%;">Diagnosis</th>
+                    <th style="width: 40%;">Treatment Plan</th>
+                    <th style="width: 20%;">Action</th>
+                </tr>
+                </thead>
+                <tbody id="patient-list-body">
+                <tr>
+                    <td colspan="5" class="table-placeholder">Loading patient data...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Progress Visualization Section (Initially hidden) -->
+    <div id="progress-visualization-card" class="card full-width hidden">
+        <div class="chart-header">
+            <h2 id="chart-title" class="card-title">Patient Progress: </h2>
+            <button onclick="hideProgressView()" class="btn btn-action btn-close">
+                Close View
+            </button>
+        </div>
+        <div class="chart-container">
+            <canvas id="progressChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // API Configuration
+    const API_BASE_URL = 'http://localhost:7000/api';
+
+    // Global state for Chart.js instance
+    let progressChartInstance = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadPatients();
+        setupAddPatientForm();
+        setupAddProgressForm();
+    });
+
+    // -------------------------------------------------------------
+    // 1. Patient Registration Form Handling
+    // -------------------------------------------------------------
+
+    function setupAddPatientForm() {
+        const form = document.getElementById('add-patient-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/patients`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    const newPatient = await response.json();
+                    alert(`Patient ${newPatient.name} registered successfully! ID: ${newPatient.id}`);
+                    form.reset();
+                    loadPatients(); // Refresh the patient list
+                } else {
+                    const errorText = await response.text();
+                    alert(`Failed to register patient: ${errorText || response.statusText}`);
+                }
+            } catch (error) {
+                console.error('Error submitting patient registration:', error);
+                alert('Network error while submitting patient registration.');
+            }
+        });
+    }
+
+    // -------------------------------------------------------------
+    // 2. Patient Progress Form Handling
+    // -------------------------------------------------------------
+
+    function setupAddProgressForm() {
+        const form = document.getElementById('add-progress-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            // Convert numerical fields
+            data.patientId = parseInt(data.patientId);
+            data.cycleNumber = parseInt(data.cycleNumber);
+            data.tumorMarkerLevel = parseFloat(data.tumorMarkerLevel);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/progress`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.status === 201) {
+                    alert('Patient progress recorded successfully!');
+                    form.reset();
+                } else {
+                    const errorText = await response.text();
+                    alert(`Failed to record progress: ${errorText || response.statusText}`);
+                }
+            } catch (error) {
+                console.error('Error submitting progress:', error);
+                alert('Network error while submitting progress.');
+            }
+        });
+    }
+
+    // -------------------------------------------------------------
+    // 3. Patient List and Table Rendering
+    // -------------------------------------------------------------
+
+    async function loadPatients() {
+        const tbody = document.getElementById('patient-list-body');
+        tbody.innerHTML = '<tr><td colspan="5" class="table-placeholder">Loading patient data...</td></tr>';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/patients`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const patients = await response.json();
+            tbody.innerHTML = ''; // Clear loading message
+
+            if (patients.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="5" class="table-placeholder" style="padding: 16px 0;">No active patient records found.</td></tr>';
+                 return;
+            }
+
+            patients.forEach(patient => {
+                const row = tbody.insertRow();
+                row.className = 'patient-row'; // Custom class for table row styling
+
+                row.insertCell().textContent = patient.id;
+                row.insertCell().textContent = patient.name;
+                row.insertCell().textContent = patient.diagnosis;
+                row.insertCell().textContent = patient.treatmentPlan;
+
+                const actionCell = row.insertCell();
+                const progressBtn = document.createElement('button');
+                progressBtn.textContent = 'View Progress';
+                progressBtn.className = 'btn btn-action btn-progress';
+                progressBtn.onclick = () => showProgressView(patient.id, patient.name);
+
+                const updateIdBtn = document.createElement('button');
+                updateIdBtn.textContent = 'Update Progress ID';
+                updateIdBtn.className = 'btn btn-action btn-update-id';
+                updateIdBtn.onclick = () => document.getElementById('progress_patient_id').value = patient.id;
+
+                actionCell.appendChild(progressBtn);
+                actionCell.appendChild(updateIdBtn);
+            });
+
+        } catch (error) {
+            console.error('Failed to load patients:', error);
+            tbody.innerHTML = '<tr><td colspan="5" class="table-placeholder" style="color: var(--color-danger); padding: 16px 0;">Error loading data. Is the Java server running on port 7000?</td></tr>';
+        }
+    }
+
+    // -------------------------------------------------------------
+    // 4. Progress Visualization (Chart.js)
+    // -------------------------------------------------------------
+
+    async function showProgressView(patientId, patientName) {
+        const chartCard = document.getElementById('progress-visualization-card');
+        const chartTitle = document.getElementById('chart-title');
+
+        // Critical DOM element null check
+        if (!chartTitle || !chartCard) {
+            console.error("Critical DOM elements for charting not found (chart-title or progress-visualization-card).");
+            alert("An internal error occurred: Chart elements missing.");
+            return;
+        }
+
+        chartTitle.textContent = `Patient Progress: ${patientName} (ID: ${patientId})`;
+        chartCard.classList.remove('hidden');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/progress/${patientId}`);
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    alert(`No progress data found for ${patientName}. Please add an initial entry.`);
+                    chartCard.classList.add('hidden');
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            renderChart(data);
+
+        } catch (error) {
+            console.error('Failed to load progress data:', error);
+            alert('Error loading progress data. Check console.');
+            chartCard.classList.add('hidden');
+        }
+    }
+
+    function hideProgressView() {
+        document.getElementById('progress-visualization-card').classList.add('hidden');
+    }
+
+    function renderChart(progressData) {
+        const ctx = document.getElementById('progressChart').getContext('2d');
+
+        // Extract data for Chart.js
+        const labels = progressData.map(p => `Cycle ${p.cycleNumber} (${p.measurementDate})`);
+        const tumorMarkers = progressData.map(p => p.tumorMarkerLevel);
+        const statuses = progressData.map(p => p.status); // Used for tooltips/annotations
+
+        // Destroy existing chart instance if it exists
+        if (progressChartInstance) {
+            progressChartInstance.destroy();
+        }
+
+        progressChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Tumor Marker Level (U/mL)',
+                    data: tumorMarkers,
+                    borderColor: 'var(--color-danger)',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    fill: true,
+                    tension: 0.2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    /* Use CSS variables for chart point colors */
+                    pointBackgroundColor: tumorMarkers.map(level => level > 200 ? 'var(--color-danger)' : 'var(--color-secondary)'),
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            // Add Status and Dose information to the tooltip
+                            title: (context) => context[0].label,
+                            label: (context) => {
+                                const progress = progressData[context.dataIndex];
+                                return [
+                                    `Marker: ${context.formattedValue} U/mL`,
+                                    `Status: ${progress.status}`,
+                                    `Dose: ${progress.treatmentDose}`
+                                ];
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Tumor Marker Progression Over Treatment Cycles'
+                    }
+                },
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Tumor Marker Level (U/mL)'
+                        },
+                        beginAtZero: true
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Treatment Cycle'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+</script>
+</body>
+</html>
