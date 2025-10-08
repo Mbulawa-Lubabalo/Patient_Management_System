@@ -1,7 +1,9 @@
 package org.example.model;
 
 /**
- * POJO representing a patient record. Maps to the 'patient' SQLite table.
+ * POJO (Plain Old Java Object) representing a patient record.
+ * This object is used to transfer patient data between the API, DAOs, and the frontend.
+ * It maps directly to the 'patient' SQLite table.
  */
 public class Patient {
 

@@ -10,7 +10,8 @@ import org.example.model.PatientProgress;
 import java.util.List;
 
 /**
- * Handles all REST API endpoints for the patient management system.
+ * Controller class to handle all API endpoints for the application.
+ * It manages routing requests, processing data, and interacting with the DAO layer.
  */
 public class ApiController {
 
@@ -21,6 +22,11 @@ public class ApiController {
     // PATIENT API METHODS
     // -------------------------------------------------------------------
 
+    /**
+     * Handles GET request to retrieve all patient records.
+     * Responds with a JSON array of Patient objects.
+     * @param ctx The Javalin request context.
+     */
     public static void getAllPatients(Context ctx) {
         try {
             List<Patient> patients = patientDAO.getAllPatients();
@@ -31,6 +37,12 @@ public class ApiController {
         }
     }
 
+    /**
+     * Handles POST request to add a new patient record.
+     * Expects a JSON body mapping to the Patient model.
+     * On successful creation, returns the new Patient object with its generated ID.
+     * @param ctx The Javalin request context containing the Patient JSON body.
+     */
     public static void addPatient(Context ctx) {
         try {
             Patient newPatient = ctx.bodyAsClass(Patient.class);
@@ -52,6 +64,12 @@ public class ApiController {
     // PROGRESS API METHODS
     // -------------------------------------------------------------------
 
+    /**
+     * Handles POST request to add a new patient progress entry.
+     * Expects a JSON body mapping to the PatientProgress model.
+     * Performs basic validation on patient ID and cycle number.
+     * @param ctx The Javalin request context containing the PatientProgress JSON body.
+     */
     public static void addPatientProgress(Context ctx) {
         try {
             // Javalin/Jackson maps the incoming JSON fields to the PatientProgress POJO
@@ -73,6 +91,13 @@ public class ApiController {
         }
     }
 
+    /**
+     * Handles GET request to retrieve all progress entries for a specific patient.
+     * Expects the patient ID as a path parameter.
+     * Responds with a JSON array of PatientProgress objects.
+     * @param ctx The Javalin request context containing the patientId path parameter.
+     * @throws if no progress data is found for the given ID.
+     */
     public static void getPatientProgress(Context ctx) {
         try {
             int patientId = ctx.pathParamAsClass("patientId", Integer.class).get();

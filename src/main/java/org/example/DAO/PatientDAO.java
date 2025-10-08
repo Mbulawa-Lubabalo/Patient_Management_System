@@ -7,23 +7,32 @@ import java.util.List;
 
 /**
  * Data Access Object for managing Patient records in the database.
+ * This class handles all database interactions related to the Patient model.
  */
 public class PatientDAO {
 
     private static final String DEFAULT_URL = "jdbc:sqlite:oncology_pms.db";
     private final String dbUrl;
 
+    /**
+     * Default constructor, uses the standard database file path.
+     */
     public PatientDAO() {
         this(DEFAULT_URL);
     }
 
+    /**
+     * Constructor allowing a custom database URL (useful for testing or specific environments).
+     * @param dbUrl The JDBC connection string for the SQLite database.
+     */
     public PatientDAO(String dbUrl) {
         this.dbUrl = dbUrl;
     }
 
     /**
-     * Retrieves all patients from the database.
-     * @return A list of all Patient objects.
+     * Retrieves all patient records from the database.
+     * Patients are ordered by ID in descending order (newest first).
+     * @return A list of all {@link Patient} objects found in the database.
      */
     public List<Patient> getAllPatients() {
         List<Patient> patients = new ArrayList<>();
@@ -50,7 +59,8 @@ public class PatientDAO {
 
     /**
      * Inserts a new patient record into the database.
-     * @param patient The Patient object to insert.
+     * It uses {@code Statement.RETURN_GENERATED_KEYS} to retrieve the new primary key.
+     * @param patient The {@link Patient} object to insert (ID field is ignored).
      * @return The auto-generated ID of the new patient, or -1 on failure.
      */
     public int addPatient(Patient patient) {

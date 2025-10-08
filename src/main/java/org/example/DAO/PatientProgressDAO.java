@@ -7,16 +7,26 @@ import java.util.List;
 
 /**
  * Data Access Object for managing PatientProgress records in the database.
+ * This class handles the insertion and retrieval of patient treatment progress data.
  */
 public class PatientProgressDAO {
 
     private static final String DEFAULT_URL = "jdbc:sqlite:oncology_pms.db";
     private final String dbUrl;
 
+    /**
+     * Default constructor, uses the standard database file path.
+     * Connects to the database specified by {@code DEFAULT_URL}.
+     */
     public PatientProgressDAO() {
         this(DEFAULT_URL);
     }
 
+    /**
+     * Constructor allowing a custom database URL.
+     * This is useful for testing or connecting to a non-default database file.
+     * @param dbUrl The JDBC connection string for the SQLite database.
+     */
     public PatientProgressDAO(String dbUrl) {
         this.dbUrl = dbUrl;
     }
@@ -56,6 +66,7 @@ public class PatientProgressDAO {
 
     /**
      * Retrieves all progress entries for a specific patient, ordered by cycle number.
+     * This method is used to fetch data necessary for charting.
      * @param patientId The ID of the patient.
      * @return A list of PatientProgress objects.
      */

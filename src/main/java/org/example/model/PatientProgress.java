@@ -1,8 +1,9 @@
 package org.example.model;
 
 /**
- * Represents a single progress entry for a patient's treatment cycle.
- * This object maps directly to the 'patient_progress' SQLite table.
+ * POJO (Plain Old Java Object) representing a single progress entry for a patient's treatment cycle.
+ * This object is used to transfer progress data between the API, DAOs, and the frontend.
+ * It maps directly to the 'patient_progress' SQLite table.
  */
 public class PatientProgress {
 

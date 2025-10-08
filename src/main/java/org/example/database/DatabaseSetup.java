@@ -2,10 +2,21 @@ package org.example.database;
 
 import java.sql.*;
 
+
+/**
+ * Utility class responsible for setting up and initializing the SQLite database for
+ * the Oncology Patient Management System. This includes creating the necessary tables
+ * and inserting initial sample data for development and testing.
+ */
 public class DatabaseSetup {
     // The URL for the physical SQLite database file
     private static final String URL = "jdbc:sqlite:oncology_pms.db";
 
+    /**
+     * Initializes the database connection, ensures the SQLite JDBC driver is loaded,
+     * creates the necessary patient and progress tables, and inserts sample data.
+     * If the database file does not exist, it will be created.
+     */
     public static void createNewDatabase() {
         try {
             // Ensure the SQLite driver is loaded
@@ -35,6 +46,11 @@ public class DatabaseSetup {
         }
     }
 
+    /**
+     * Creates the 'patient' table if it does not already exist.
+     * The table stores patient demographic and treatment plan information.
+     * @param conn The active database connection.
+     */
     private static void createPatientTable(Connection conn) {
         String sql = "CREATE TABLE IF NOT EXISTS patient (\n"
                 + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
@@ -51,6 +67,12 @@ public class DatabaseSetup {
         }
     }
 
+    /**
+     * Creates the 'patient_progress' table if it does not already exist.
+     * This table tracks treatment cycles, tumor marker levels, and status.
+     * It includes a foreign key relationship to the 'patient' table.
+     * @param conn The active database connection.
+     */
     private static void createProgressTable(Connection conn) {
         String sql = "CREATE TABLE IF NOT EXISTS patient_progress (\n"
                 + " progress_id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
@@ -71,6 +93,12 @@ public class DatabaseSetup {
         }
     }
 
+    /**
+     * Inserts sample data for a predefined patient ("Alice Johnson") and several
+     * associated progress entries if they do not already exist.
+     * This uses a database transaction (batch insert) for efficiency.
+     * @param conn The active database connection.
+     */
     private static void insertSampleProgressData(Connection conn) {
         // SQL to insert Alice Johnson if she doesn't exist
         String checkPatientSql = "SELECT id FROM patient WHERE name = 'Alice Johnson'";
@@ -155,6 +183,11 @@ public class DatabaseSetup {
         }
     }
 
+    /**
+     * Main method to run the database setup utility directly.
+     * This is useful for standalone initialization of the database file.
+     * @param args Command line arguments (not used).
+     */
     public static void main(String[] args) {
         createNewDatabase();
     }
